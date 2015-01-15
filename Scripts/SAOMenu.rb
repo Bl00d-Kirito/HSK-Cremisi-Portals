@@ -5,13 +5,56 @@ CENTRE_Y = DEFAULTSCREENHEIGHT/2        #Centro dello schermo (asse Y)
 X_MOVE = 22                             #Offset della sfera
 ICON_X = 50                             #Larghezza delle icone principali
 ICON_Y = 50                             #Altezza delle icone principali
+BLOCK_X = 155							#Larghezza del blocco di sfondo
+BLOCK_Y = 38							#Altezza del blocco di sfondo
 IMG_NAME = ["men","messages","bag","user","options"]    #Array al nome delle Resource (immagini) delle icone (in ordine di apparizione)
 ICON_POS = [[322,98],[379,85],[436,100],[477,142],[493,202],[477,257],[436,299],[379,314],[322,301]]     #Posizioni assolute delle icone principali
+
+#Menu di inizializzazione (debug)
+def createMenu(selected=3)
+  menuTemp = MenuBlock.new(selected)
+  for i in 0..20
+    Graphics.update
+  end
+  menuTemp.debugMove(1)
+  for i in 0..20
+    Graphics.update
+  end
+  menuTemp.debugMove(1)
+  for i in 0..20
+    Graphics.update
+  end
+  menuTemp.debugMove(-1)
+  for i in 0..20
+    Graphics.update
+  end
+  menuTemp.debugMove(-1)
+  for i in 0..20
+    Graphics.update
+  end
+  menuTemp.debugMove(-1)
+  for i in 0..20
+    Graphics.update
+  end
+  menuTemp.debugMove(-1)
+  for i in 0..20
+    Graphics.update
+  end
+  menuTemp.debugMove(1)
+  for i in 0..20
+    Graphics.update
+  end
+  menuTemp.debugMove(1)
+  for i in 0..20
+    Graphics.update
+  end
+  menuTemp.dispose
+end
 
 #Classe principale, gestisce il blocco intero del menù (esegui con "var = MenuBlock.new")
 class MenuBlock
   def initialize(selected=3)
-    @main = MainMenu.new(selected)      #Definisco le icone principali inviaibili (prima della sfera perché devono essere al livello inferiore)
+    @main = IconMenu.new(selected)      #Definisco le icone principali inviaibili (prima della sfera perché devono essere al livello inferiore)
     @sphere = SphereMenu.new            #Definisco la sfera
     @temp = Sprite.new
     @main.startVisibility               #Avvio l'animazione delle icone principali
@@ -21,10 +64,17 @@ class MenuBlock
     @main.dispose
     @sphere.dispose
   end
+  
+  def debugMove(pos)                    #Metodo di debug per il movimento
+    @main.moveOptions(pos)
+  end
+  
 end
  
 #Funzione che gestisce la sfera centrale
 class SphereMenu
+  attr_accessor :sphere
+  
   def initialize                        #Creo la sfera in fade-in
     @sphere = Sprite.new
     @sphere.bitmap = Cache.picture("sphere")
@@ -32,7 +82,7 @@ class SphereMenu
     @sphere.y = CENTRE_Y - SPHERE_Y/2
     @sphere.opacity = 0
    
-    for i in 0..255/25
+    for i in 0..10
       Graphics.update
       @sphere.opacity += 25
     end
@@ -40,7 +90,7 @@ class SphereMenu
   end
  
   def dispose                           #Elimino la sfera in fade-out 
-   for i in 0..255/25
+   for i in 0..10
       Graphics.update
       @sphere.opacity -= 25
    end
@@ -48,50 +98,102 @@ class SphereMenu
   end
 end
  
-class MainMenu
+class IconMenu
   attr_accessor :selectedOpt
+  attr_accessor :iconOpt
+  attr_accessor :primaryMenu
   
   def initialize(selectedOpt)
     @selectedOpt = selectedOpt
-    @option =[]
+    @iconOpt =[]
     for i in 0..4
-      @option[i] = MainOption.new(i,5-@selectedOpt+i)
-      @option[i].setOpacity(0)
+      @iconOpt[i] = IconOption.new(i,5-@selectedOpt+i)
+      @iconOpt[i].setOpacity(0)
     end
+	@primaryMenu = PrimaryMenu.new(@selectedOpt)
   end
  
   def startVisibility
     for i in 0..4
-      @option[i].setOpacity(255)
+      @iconOpt[i].setOpacity(255)
     end
     initialMove
-    @option[selectedOpt-1].setSelect(true)
+    @iconOpt[selectedOpt-1].setSelect(true)
   end
  
   def initialMove
     startPos = 5-@selectedOpt
-    @incX =[]
-    @incY =[]
+    @iconX =[]
+    @iconY =[]
+	@primaryX =[]
+	
     for i in 0..4
-      @incX[i] = ((ICON_POS[startPos+i][0] - CENTRE_X - X_MOVE)/(15))
-      @incY[i] = ((ICON_POS[startPos+i][1] - CENTRE_Y)/(15))
+      @iconX[i] = ((ICON_POS[startPos+i][0] - CENTRE_X - X_MOVE)/(15))
+      @iconY[i] = ((ICON_POS[startPos+i][1] - CENTRE_Y)/(15))
     end
+	
+	for i in 0..@primaryMenu.optNum-1
+	  @primaryX[i] = (40*@primaryMenu.primaryOpt[i].pos) / 5
+	end
    
-    for i in 0..14
+    for i in 0..8
       for k in 0..4
-        @option[k].setX(@option[k].getX + @incX[k])
-        @option[k].setY(@option[k].getY + @incY[k])
+        @iconOpt[k].setX(@iconOpt[k].getX + @iconX[k])
+        @iconOpt[k].setY(@iconOpt[k].getY + @iconY[k])
       end
       Graphics.update
     end
+	
+	for i in 0..4
+	  for k in 0..4
+        @iconOpt[k].setX(@iconOpt[k].getX + @iconX[k])
+        @iconOpt[k].setY(@iconOpt[k].getY + @iconY[k])
+      end
+	  
+	  for k in 0..@primaryMenu.optNum-1
+		@primaryMenu.primaryOpt[k].setOpacity((i+1)*51)
+		@primaryMenu.primaryOpt[k].setY(@primaryMenu.primaryOpt[k].y + @primaryX[k] * 40)
+	  end
+      Graphics.update
+	end
+	  
     for i in 0..4
-      @option[i].setX(ICON_POS[@option[i].getPos][0] - ICON_X/2)
-      @option[i].setY(ICON_POS[@option[i].getPos][1] - ICON_Y/2)
+      @iconOpt[i].setX(ICON_POS[@iconOpt[i].getPos][0] - ICON_X/2)
+      @iconOpt[i].setY(ICON_POS[@iconOpt[i].getPos][1] - ICON_Y/2)
     end
+	for k in 0..@primaryMenu.optNum-1
+	  @primaryMenu.primaryOpt[k].setOpacity((i+1)*51)
+	  @primaryMenu.primaryOpt[k].setY(CENTRE_Y-BLOCK_Y/2 + @primaryMenu.primaryOpt[k].pos*40)
+	end
     Graphics.update
   end
-   
+
   def moveOptions(pos)
+    for i in 0..4
+      @iconX[i] = (ICON_POS[@iconOpt[i].getPos-pos][0] - ICON_POS[@iconOpt[i].getPos][0])/5
+      @iconY[i] = (ICON_POS[@iconOpt[i].getPos-pos][1] - ICON_POS[@iconOpt[i].getPos][1])/5
+    end
+    
+    for i in 0..3
+      for i in 0..4
+        @iconOpt[i].setX(@iconOpt[i].getX + @iconX[i])
+        @iconOpt[i].setY(@iconOpt[i].getY + @iconY[i])
+      end
+      Graphics.update
+    end
+    
+    @iconOpt[@selectedOpt-1].setSelect(false)
+    @selectedOpt += pos
+    @iconOpt[@selectedOpt-1].setSelect(true)
+    
+    for i in 0..4
+      @iconOpt[i].setPos(@iconOpt[i].getPos-pos)
+      @iconOpt[i].setX(ICON_POS[@iconOpt[i].getPos][0] - ICON_X/2)
+      @iconOpt[i].setY(ICON_POS[@iconOpt[i].getPos][1] - ICON_Y/2)
+    end
+    Graphics.update
+    
+=begin
     case pos
     when 0
       @icon.x = ICON_POS[0][0]-ICON_X/2
@@ -118,36 +220,37 @@ class MainMenu
       @icon.x = ICON_POS[7][0]-ICON_X/2
       @icon.y = ICON_POS[7][1]-ICON_Y/2
     end
+=end
   end
  
   def dispose
     @incX =[]
     @incY =[]
     for i in 0..4
-      @incX[i] = ((ICON_POS[@option[i].getPos][0] - CENTRE_X - X_MOVE)/(15))
-      @incY[i] = ((ICON_POS[@option[i].getPos][1] - CENTRE_Y)/(15))
+      @incX[i] = ((ICON_POS[@iconOpt[i].getPos][0] - CENTRE_X - X_MOVE)/(15))
+      @incY[i] = ((ICON_POS[@iconOpt[i].getPos][1] - CENTRE_Y)/(15))
     end
    
     for i in 0..14
       for k in 0..4
-        @option[k].setX(@option[k].getX - @incX[k])
-        @option[k].setY(@option[k].getY - @incY[k])
+        @iconOpt[k].setX(@iconOpt[k].getX - @incX[k])
+        @iconOpt[k].setY(@iconOpt[k].getY - @incY[k])
       end
       Graphics.update
     end
     for i in 0..4
-      @option[i].setX(CENTRE_X - ICON_X/2)
-      @option[i].setY(CENTRE_Y - ICON_Y/2)
+      @iconOpt[i].setX(CENTRE_X - ICON_X/2)
+      @iconOpt[i].setY(CENTRE_Y - ICON_Y/2)
     end
     Graphics.update
     for i in 0..4
-      @option[i].dispose
+      @iconOpt[i].dispose
     end
   end
  
 end
  
-class MainOption
+class IconOption
   attr_accessor :res
   attr_accessor :pos
  
@@ -170,6 +273,10 @@ class MainOption
  
   def getPos
     return pos
+  end
+  
+  def setPos(pos)
+    @pos = pos
   end
  
   def getOpacity
@@ -201,29 +308,160 @@ class MainOption
   end
 end
  
+class PrimaryMenu
+  attr_accessor :res
+  attr_accessor :primaryOpt
+  attr_accessor :optNum
+  
+  def initialize(res)
+    @res = res-1
+	
+	@primaryOpt =[]
+	
+    case @res
+    when 0
+      @primaryOpt[0] = PrimaryOption.new(0,"Pokémon","items")
+	  @primaryOpt[1] = PrimaryOption.new(1,"PokéDex","items")
+	when 1
+	  @primaryOpt[0] = PrimaryOption.new(-1,"Mail","mail")
+	  @primaryOpt[1] = PrimaryOption.new(0,"Messaggi di Sistema","items")
+	  @primaryOpt[2] = PrimaryOption.new(1,"PokéGear","items")
+	when 2
+	  @primaryOpt[0] = PrimaryOption.new(-3,"Strumenti","items")
+	  @primaryOpt[1] = PrimaryOption.new(-2,"Rimedi","plus")
+	  @primaryOpt[2] = PrimaryOption.new(-1,"Poké Balls","pokeball")
+	  @primaryOpt[3] = PrimaryOption.new(0,"MT & MN","blades")
+	  @primaryOpt[4] = PrimaryOption.new(1,"bacche","berry")
+	  @primaryOpt[5] = PrimaryOption.new(2,"Potenziamenti","parrying")
+	  @primaryOpt[6] = PrimaryOption.new(3,"Strumenti base","base_items")
+	when 3
+	  @primaryOpt[0] = PrimaryOption.new(-1,"Statistiche","items")
+	  @primaryOpt[1] = PrimaryOption.new(0,"Scheda allenatore","items")
+	  @primaryOpt[2] = PrimaryOption.new(1,"Equipaggiamento","items")
+	when 4
+	  @primaryOpt[0] = PrimaryOption.new(-1,"Informazioni","items")
+	  @primaryOpt[1] = PrimaryOption.new(0,"Salva Partita","items")
+	  @primaryOpt[2] = PrimaryOption.new(1,"Impostazioni","items")
+	end
+
+	@optNum = @primaryOpt.length
+  end
+end
+ 
+class PrimaryOption
+	attr_accessor :pos
+	attr_accessor :nameStr
+	attr_accessor :icon
+	attr_accessor :x
+	attr_accessor :y
+	attr_accessor :opacity
+	attr_accessor :arrow
+	attr_accessor :bg
+	attr_accessor :icon
+	attr_accessor :name
+	attr_accessor :arrowPos
+	
+  def initialize(pos,nameStr,icon)
+	@pos = pos
+	@nameStr = nameStr
+	@icon = icon
+	
+	@arrow = Sprite.new
+    @bg = Sprite.new
+	@icon = Sprite.new
+	@name = Sprite.new
+
+	if @pos != 0
+	  @arrow.bitmap = Cache.picture("primary_arrow")
+	  @bg.bitmap = Cache.picture("block")
+	  @icon.bitmap = Cache.picture(@icon.to_s)
+	else
+	  @arrow.bitmap = Cache.picture("primary_arrow_on")
+	  @bg.bitmap = Cache.picture("block_on")
+      @icon.bitmap = Cache.picture(@icon.to_s + "_on")
+	end  
+
+	@name.bitmap = Bitmap.new(BLOCK_X-40,BLOCK_Y)
+	@name.bitmap.font = Font.new("SAO UI", 24)
+	@name.bitmap.draw_text(0,0,BLOCK_X-40,BLOCK_Y,@nameStr)
+
+	@x = 550
+	@y = CENTRE_Y - BLOCK_Y/2
+	
+	@arrowPos = 0
+	@arrow.x = @x + 35
+    @bg.x = @x + 35
+	@icon.x = @x + 40
+	@name.x = @x + 75
+	
+	@arrow.y = @y
+    @bg.y = @y
+	@icon.y = @y
+	@name.y = @y
+	
+	@arrow.opacity = 0
+	@bg.opacity = 0
+	@icon.opacity = 0
+	@name.opacity = 0
+  end
+
+  def dispose
+	@arrow.dispose
+	@bg.dispose
+	@icon.dispose
+	@name.dispose
+  end
+  
+  def setX(x)
+	@x = x
+	@arrow.x = @x + 35
+    @bg.x = @x + 35
+	@icon.x = @x + 40
+	@name.x = @x + 75
+  end
+  
+  def setY(y)
+	@y = y
+	@arrow.y = @y
+    @bg.y = @y
+	@icon.y = @y
+	@name.y = @y
+  end
+  
+  def setOpacity(opacity)
+	@opacity = opacity
+	@arrow.opacity = @opacity
+	@bg.opacity = @opacity
+	@icon.opacity = @opacity
+	@name.opacity = @opacity
+  end
+  
+  def moveArrow(pos)
+    @arrowPos = pos
+	@arrow.x = @x + 35 - @arrowPos
+  end
+  
+  def setSelect(select)
+    if select == true
+      @arrow.bitmap = Cache.picture("primary_arrow_on")
+      @bg.bitmap = Cache.picture("block_on")
+      @icon.bitmap = Cache.picture(@icon + "_on")
+    else
+      @arrow.bitmap = Cache.picture("primary_arrow")
+      @bg.bitmap = Cache.picture("block")
+      @icon.bitmap = Cache.picture(@icon)
+    end
+  end
+end
+ 
 class SecondaryMenu
   def initialize
+    @arrow = Sprite.new
     @option =[]
   end
 end
  
 class SecondaryOption
-  def initialize
-    @bg = Sprite.new
-    @icon = Sprite.new
-    @name = Sprite.new
-    @arrow = Sprite.new
-  end
-end
- 
-class ChooseMenu
-  def initialize
-    @arrow = Sprite.new
-    @option =[]
-  end
-end
- 
-class ChooseOption
   def initialize
     @bg = Sprite.new
     @icon = Sprite.new
