@@ -316,35 +316,57 @@ class PrimaryMenu
   def initialize(res)
     @res = res-1
 	
-	@primaryOpt =[]
+    @primaryOpt =[]
 	
     case @res
     when 0
       @primaryOpt[0] = PrimaryOption.new(0,"Pokémon","items")
-	  @primaryOpt[1] = PrimaryOption.new(1,"PokéDex","items")
-	when 1
-	  @primaryOpt[0] = PrimaryOption.new(-1,"Mail","mail")
-	  @primaryOpt[1] = PrimaryOption.new(0,"Messaggi di Sistema","items")
-	  @primaryOpt[2] = PrimaryOption.new(1,"PokéGear","items")
-	when 2
-	  @primaryOpt[0] = PrimaryOption.new(-3,"Strumenti","items")
-	  @primaryOpt[1] = PrimaryOption.new(-2,"Rimedi","plus")
-	  @primaryOpt[2] = PrimaryOption.new(-1,"Poké Balls","pokeball")
-	  @primaryOpt[3] = PrimaryOption.new(0,"MT & MN","blades")
-	  @primaryOpt[4] = PrimaryOption.new(1,"bacche","berry")
-	  @primaryOpt[5] = PrimaryOption.new(2,"Potenziamenti","parrying")
-	  @primaryOpt[6] = PrimaryOption.new(3,"Strumenti base","base_items")
-	when 3
-	  @primaryOpt[0] = PrimaryOption.new(-1,"Statistiche","items")
-	  @primaryOpt[1] = PrimaryOption.new(0,"Scheda allenatore","items")
-	  @primaryOpt[2] = PrimaryOption.new(1,"Equipaggiamento","items")
-	when 4
-	  @primaryOpt[0] = PrimaryOption.new(-1,"Informazioni","items")
-	  @primaryOpt[1] = PrimaryOption.new(0,"Salva Partita","items")
-	  @primaryOpt[2] = PrimaryOption.new(1,"Impostazioni","items")
-	end
-
-	@optNum = @primaryOpt.length
+      @primaryOpt[1] = PrimaryOption.new(1,"PokéDex","items")
+    when 1
+      @primaryOpt[0] = PrimaryOption.new(-1,"Mail","mail")
+      @primaryOpt[1] = PrimaryOption.new(0,"Messaggi di Sistema","items")
+      @primaryOpt[2] = PrimaryOption.new(1,"PokéGear","items")
+    when 2
+      @primaryOpt[0] = PrimaryOption.new(-3,"Strumenti","items")
+      @primaryOpt[1] = PrimaryOption.new(-2,"Rimedi","plus")
+      @primaryOpt[2] = PrimaryOption.new(-1,"Poké Balls","pokeball")
+      @primaryOpt[3] = PrimaryOption.new(0,"MT & MN","blades")
+      @primaryOpt[4] = PrimaryOption.new(1,"bacche","berry")
+      @primaryOpt[5] = PrimaryOption.new(2,"Potenziamenti","parrying")
+      @primaryOpt[6] = PrimaryOption.new(3,"Strumenti base","base_items")
+    when 3
+      @primaryOpt[0] = PrimaryOption.new(-1,"Statistiche","items")
+      @primaryOpt[1] = PrimaryOption.new(0,"Scheda allenatore","items")
+      @primaryOpt[2] = PrimaryOption.new(1,"Equipaggiamento","items")
+    when 4
+      @primaryOpt[0] = PrimaryOption.new(-1,"Informazioni","items")
+      @primaryOpt[1] = PrimaryOption.new(0,"Salva Partita","items")
+      @primaryOpt[2] = PrimaryOption.new(1,"Impostazioni","items")
+    end
+    @optNum = @primaryOpt.length
+  end
+  
+  def move(num)
+    if @optNum+num>=0 && @optNum+num<@primaryOption.size
+      @primaryOpt[@optNum].setSelect(false)
+      @optNum += num
+      @primaryOpt[@optNum].setSelect(true)
+      @primaryOpt.each do |opt|
+        opt.pos += num
+      end
+      
+      for i in 0..5
+        @primaryOpt.each do |opt|
+          opt.setY(opt.getY+(40/5)*(-num))
+          if opt.pos = @optNum
+            #TODO
+          end
+        end
+      end
+      return true
+    else
+      return false
+    end
   end
 end
  
@@ -362,62 +384,62 @@ class PrimaryOption
 	attr_accessor :arrowPos
 	
   def initialize(pos,nameStr,icon)
-	@pos = pos
-	@nameStr = nameStr
-	@icon = icon
-	
-	@arrow = Sprite.new
+    @pos = pos
+    @nameStr = nameStr
+    @icon = icon
+    
+    @arrow = Sprite.new
     @bg = Sprite.new
-	@icon = Sprite.new
-	@name = Sprite.new
-
-	if @pos != 0
-	  @arrow.bitmap = Cache.picture("primary_arrow")
-	  @bg.bitmap = Cache.picture("block")
-	  @icon.bitmap = Cache.picture(@icon.to_s)
-	else
-	  @arrow.bitmap = Cache.picture("primary_arrow_on")
-	  @bg.bitmap = Cache.picture("block_on")
+    @icon = Sprite.new
+    @name = Sprite.new
+  
+    if @pos != 0
+      @arrow.bitmap = Cache.picture("primary_arrow")
+      @bg.bitmap = Cache.picture("block")
+      @icon.bitmap = Cache.picture(@icon.to_s)
+    else
+      @arrow.bitmap = Cache.picture("primary_arrow_on")
+      @bg.bitmap = Cache.picture("block_on")
       @icon.bitmap = Cache.picture(@icon.to_s + "_on")
-	end  
-
-	@name.bitmap = Bitmap.new(BLOCK_X-40,BLOCK_Y)
-	@name.bitmap.font = Font.new("SAO UI", 24)
-	@name.bitmap.draw_text(0,0,BLOCK_X-40,BLOCK_Y,@nameStr)
-
-	@x = 550
-	@y = CENTRE_Y - BLOCK_Y/2
-	
-	@arrowPos = 0
-	@arrow.x = @x + 35
+    end  
+  
+    @name.bitmap = Bitmap.new(BLOCK_X-40,BLOCK_Y)
+    @name.bitmap.font = Font.new("SAO UI", 24)
+    @name.bitmap.draw_text(0,0,BLOCK_X-40,BLOCK_Y,@nameStr)
+  
+    @x = 505
+    @y = CENTRE_Y - BLOCK_Y/2
+    
+    @arrowPos = 0
+    @arrow.x = @x + 35
     @bg.x = @x + 35
-	@icon.x = @x + 40
-	@name.x = @x + 75
-	
-	@arrow.y = @y
+    @icon.x = @x + 40
+    @name.x = @x + 75
+    
+    @arrow.y = @y
     @bg.y = @y
-	@icon.y = @y
-	@name.y = @y
-	
-	@arrow.opacity = 0
-	@bg.opacity = 0
-	@icon.opacity = 0
-	@name.opacity = 0
+    @icon.y = @y
+    @name.y = @y
+    
+    @arrow.opacity = 0
+    @bg.opacity = 0
+    @icon.opacity = 0
+    @name.opacity = 0
   end
 
   def dispose
-	@arrow.dispose
-	@bg.dispose
-	@icon.dispose
-	@name.dispose
+    @arrow.dispose
+    @bg.dispose
+    @icon.dispose
+    @name.dispose
   end
   
   def setX(x)
-	@x = x
-	@arrow.x = @x + 35
+    @x = x
+    @arrow.x = @x + 35
     @bg.x = @x + 35
-	@icon.x = @x + 40
-	@name.x = @x + 75
+    @icon.x = @x + 40
+    @name.x = @x + 75
   end
   
   def setY(y)
@@ -445,11 +467,11 @@ class PrimaryOption
     if select == true
       @arrow.bitmap = Cache.picture("primary_arrow_on")
       @bg.bitmap = Cache.picture("block_on")
-      @icon.bitmap = Cache.picture(@icon + "_on")
+      @icon.bitmap = Cache.picture(@icon.to_s + "_on")
     else
       @arrow.bitmap = Cache.picture("primary_arrow")
       @bg.bitmap = Cache.picture("block")
-      @icon.bitmap = Cache.picture(@icon)
+      @icon.bitmap = Cache.picture(@icon.to_s)
     end
   end
 end
